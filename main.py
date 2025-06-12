@@ -1,157 +1,127 @@
-import os
+from maquina_norma import ProcessadorNorma
 
-def inicializar_registradores_personalizado():
-    registradores = {}
-    print("\n--- Inicialização dos Registradores ---")
-    while True:
-        try:
-            n = int(input("Quantos registradores deseja usar? (1 a 8): "))
-            if 1 <= n <= 8:
-                break
-            else:
-                print("Digite um número entre 1 e 8.")
-        except ValueError:
-            print("Digite um número válido.")
+def somar_valores(x, y):
+    """
+    Soma dois valores utilizando a máquina de Norma.
 
-    lista_registradores = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'][:n]
+    Parâmetros:
+        x (int): Primeiro valor a ser somado.
+        y (int): Segundo valor a ser somado.
 
-    for r in lista_registradores:
-        while True:
-            try:
-                val = int(input(f"Valor inicial para {r}: "))
-                registradores[r] = val
-                break
-            except ValueError:
-                print("Digite um número inteiro.")
+    Retorna:
+        None
+    """
+    processador = ProcessadorNorma()
+    processador.carregar_codigo("./operacoes/somar.txt")  # Carrega o código da soma
+    processador.inicializar_registradores({'A': x, 'B': y, 'C': 0})  # Inicializa registradores
+    processador.executar_codigo()  # Executa o código
 
-    # Inicializa os demais com 0 para manter compatibilidade
-    for r in ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']:
-        if r not in registradores:
-            registradores[r] = 0
+    resultado = processador.registradores['A'].valor  # Resultado fica em A
+    print(f"A soma de {x} + {y} é: {resultado}")
 
-    return registradores, lista_registradores
+def produto_valores(x, y):
+    """
+    Multiplica dois valores utilizando a máquina de Norma.
 
-def exibir_estado(registradores, linha_atual, instrucao, usados):
-    estado = tuple(registradores[r] for r in usados)
-    print(f"{estado} , {linha_atual}) {instrucao}")
+    Parâmetros:
+        x (int): Primeiro valor.
+        y (int): Segundo valor.
 
-def interpretar_instrucao(linha):
-    rotulo, instr = linha.split(':')
-    rotulo = int(rotulo.strip())
-    instr = instr.strip()
-    partes = instr.split()
+    Retorna:
+        None
+    """
+    processador = ProcessadorNorma()
+    processador.carregar_codigo("./operacoes/multiplicar.txt")  # Carrega o código da multiplicação
+    processador.inicializar_registradores({'A': x, 'B': y, 'C': 0, 'D': 0})  # Inicializa registradores
+    processador.executar_codigo()  # Executa o código
 
-    if len(partes) == 3 and partes[0] == "ADD":
-        return rotulo, ("ADD", partes[1], int(partes[2]))
-    elif len(partes) == 3 and partes[0] == "SUB":
-        return rotulo, ("SUB", partes[1], int(partes[2]))
-    elif len(partes) == 4 and partes[0] == "ZER":
-        return rotulo, ("ZER", partes[1], int(partes[2]), int(partes[3]))
-    else:
-        raise ValueError(f"Instrução inválida: {instr}")
+    resultado = processador.registradores['A'].valor  # Resultado fica em A
+    print(f"A multiplicação de {x} * {y} é: {resultado}")
 
-def ler_programa(caminho):
-    if not os.path.exists(caminho):
-        print("Arquivo não encontrado.")
-        return None
-    programa = {}
-    with open(caminho, 'r') as f:
-        for linha in f:
-            linha = linha.strip()
-            if linha:
-                try:
-                    rotulo, dados = interpretar_instrucao(linha)
-                    programa[rotulo] = dados
-                except Exception as e:
-                    print(f"Erro ao ler linha: {linha}\n{e}")
-    return programa
+def calcular_fatorial(valor):
+    """
+    Calcula o fatorial de um valor utilizando a máquina de Norma.
 
-def executar_programa(programa, registradores, usados):
-    if not programa:
-        print("Nenhum programa carregado.")
+    Parâmetros:
+        valor (int): Valor para calcular o fatorial.
+
+    Retorna:
+        None
+    """
+    if valor == 0:
+        print(f"O fatorial de {valor} é: 1")
         return
 
-    print("\n--- Execução Iniciada ---\n")
-    print("Valores iniciais dos registradores:")
-    estado = tuple(registradores[r] for r in usados)
-    print(f"{estado} , M) Entrada de Dados")
+    processador = ProcessadorNorma()
+    processador.carregar_codigo("./operacoes/fatorial.txt")  # Carrega o código do fatorial
+    processador.inicializar_registradores({'A': valor, 'B': 0, 'C': 0, 'D': 0})  # Inicializa registradores
+    processador.executar_codigo()  # Executa o código
 
-    linha_atual = min(programa.keys())
+    resultado = processador.registradores['A'].valor  # Resultado fica em A
+    print(f"O fatorial de {valor} é: {resultado}")
 
-    while linha_atual in programa:
-        instrucao = programa[linha_atual]
-        op = instrucao[0]
-        reg = instrucao[1]
+def comparar_menor(x, y):
+    """
+    Compara se x é menor que y utilizando a máquina de Norma.
 
-        if op == "ADD":
-            prox = instrucao[2]
-            registradores[reg] += 1
-            exibir_estado(registradores, linha_atual, f"FACA ADD ({reg}) VA_PARA {prox}", usados)
-            linha_atual = prox
+    Parâmetros:
+        x (int): Primeiro valor.
+        y (int): Segundo valor.
 
-        elif op == "SUB":
-            prox = instrucao[2]
-            if registradores[reg] > 0:
-                registradores[reg] -= 1
-            exibir_estado(registradores, linha_atual, f"FACA SUB ({reg}) VA_PARA {prox}", usados)
-            linha_atual = prox
+    Retorna:
+        None
+    """
+    processador = ProcessadorNorma()
+    processador.carregar_codigo("./operacoes/a_b.txt")  # Carrega o código de comparação
+    processador.inicializar_registradores({'A': x, 'B': y, 'C': 0, 'D': 0, 'E': 0})  # Inicializa registradores
+    processador.executar_codigo()  # Executa o código
 
-        elif op == "ZER":
-            destino_zero, destino_nzero = instrucao[2], instrucao[3]
-            proxima = destino_zero if registradores[reg] == 0 else destino_nzero
-            exibir_estado(registradores, linha_atual, f"SE ZER ({reg}) ENTAO VA_PARA {destino_zero} SENAO VA_PARA {destino_nzero}", usados)
-            linha_atual = proxima
+    # O resultado da comparação é armazenado no registrador E
+    if processador.registradores['E'].valor > 0:
+        print(f"{x} é menor que {y}.")
+    else:
+        print(f"{x} NÃO é menor que {y}.")
 
-        else:
-            print(f"Instrução desconhecida: {instrucao}")
-            break
+def menu_principal():
+    """
+    Exibe o menu principal e executa a operação escolhida pelo usuário.
 
-    print("\n--- Programa encerrado ---")
+    Retorna:
+        None
+    """
+    print("Selecione a operação desejada:")
+    print("1 - Somar dois valores")
+    print("2 - Multiplicar dois valores")
+    print("3 - Calcular fatorial")
+    print("4 - Verificar se X < Y")
+    print("0 - Encerrar")
 
-def mostrar_registradores(registradores, usados):
-    print("\nEstado atual dos registradores:")
-    for r in usados:
-        print(f"{r} = {registradores.get(r, 0)}", end="  ")
-    print("\n")
+    opcao = input("Informe a opção: ")
 
-def menu():
-    registradores = None
-    programa = None
-    usados = []
+    if opcao == '1':
+        x = int(input("Digite o valor de X: "))
+        y = int(input("Digite o valor de Y: "))
+        somar_valores(x, y)
+    elif opcao == '2':
+        x = int(input("Digite o valor de X: "))
+        y = int(input("Digite o valor de Y: "))
+        produto_valores(x, y)
+    elif opcao == '3':
+        valor = int(input("Digite o valor: "))
+        calcular_fatorial(valor)
+    elif opcao == '4':
+        x = int(input("Digite o valor de X: "))
+        y = int(input("Digite o valor de Y: "))
+        comparar_menor(x, y)
+    elif opcao == '0':
+        print("Finalizando...")
+        return
+    else:
+        print("Opção inválida!")
 
-    while True:
-        print("\n======= MÁQUINA NORMA =======")
-        print("1 - Inicializar registradores")
-        print("2 - Carregar programa (.txt)")
-        print("3 - Exibir registradores")
-        print("4 - Executar programa")
-        print("5 - Sair")
-        opcao = input("Escolha uma opção: ")
-
-        if opcao == '1':
-            registradores, usados = inicializar_registradores_personalizado()
-        elif opcao == '2':
-            caminho = input("Digite o caminho do arquivo .txt: ")
-            programa = ler_programa(caminho)
-            if programa:
-                print("Programa carregado com sucesso.")
-        elif opcao == '3':
-            if registradores:
-                mostrar_registradores(registradores, usados)
-            else:
-                print("Inicialize os registradores primeiro.")
-        elif opcao == '4':
-            if not registradores:
-                print("Inicialize os registradores primeiro.")
-            elif not programa:
-                print("Carregue um programa primeiro.")
-            else:
-                executar_programa(programa, registradores, usados)
-        elif opcao == '5':
-            print("Encerrando o programa.")
-            break
-        else:
-            print("Opção inválida. Tente novamente.")
+    print()
+    menu_principal()  # Chama novamente o menu para nova operação
 
 if __name__ == "__main__":
-    menu()
+    # Ponto de entrada do programa
+    menu_principal()
